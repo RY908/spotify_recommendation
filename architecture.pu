@@ -1,0 +1,50 @@
+@startuml 
+participant user
+participant "server" as server
+participant "Spotify API" as spotify
+
+===Spotify authorization===
+
+server -> spotify: Authorization request
+spotify --> user: Display authorization page
+user -> spotify: Login
+spotify --> server: Redirect
+server -> spotify: Request token
+spotify --> server: Return token
+server -> spotify: client.CurrentUsersFollowedArtists
+spotify --> server: FullArtistCursorPage
+server -> DB: Store (artistName, artistId)
+
+===Get artists recommendation===
+
+server -> user: Display user's followed artists
+user -> server: Pick up artist
+server -> DB: Get_artist_id([]artistName)
+DB --> server: Return []artistId
+
+server -> spotify: GetRecommendations()
+spotify --> server: Return recommended track
+server -> server: Get artist id from track information
+alt related artist is not stored or timestamp expired
+  server -> spotify: RelatedArtist()
+  spotify --> server: Return related artists
+  server -> DB: store (artist, related artists)
+else stored in DB
+  server -> DB: GetRelatedArtists()
+  DB --> server: Return related artists
+end 
+
+server -> DB: store (artistName, relatedArtists)
+server --> user: Display artist recommendation
+
+===Get tracks recommendation===
+
+server -> user: Display user's followed artists
+user -> server: Pick up artist up to 5
+server -> DB: Get_artist_id([]artistName)
+DB --> server: Return []artistId
+server -> spotify: GetRecommendations
+spotify --> server: Return tracks
+server --> user: Display track recommendations
+
+@enduml

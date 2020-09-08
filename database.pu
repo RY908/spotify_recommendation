@@ -1,0 +1,21 @@
+@startuml 
+
+hide circle
+
+entity "Artist" {
+  ID: string
+  --
+  name: string
+  url: string
+  iconUrl: string
+  timestamp: timestamp
+}
+
+entity "Relation" {
+  --
+  name1: string <<FK>>
+  name2: string <<FK>>
+}
+
+Artist }o..o{ Relation
+@enduml
