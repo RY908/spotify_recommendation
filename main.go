@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"net/http"
+	"net/url"
 
 	"github.com/zmb3/spotify"
 )
@@ -15,55 +16,67 @@ import (
 const redirectURI = "http://localhost:8080/callback"
 
 var (
+	clientID = os.Getenv("SPOTIFY_ID_3")
+	secretKey = os.Getenv("SPOTIFY_SECRET_3")
 	auth  = spotify.NewAuthenticator(redirectURI, spotify.ScopeUserFollowRead)
 	ch    = make(chan *spotify.Client)
 	state = "abc123"
+	client spotify.Client
 )
 
+
 func main() {
-	// first start an HTTP server
-	http.HandleFunc("/callback", completeAuth)
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Got request for:", r.URL.String())
-	})
-	go http.ListenAndServe(":8080", nil)
-
-	clientID := os.Getenv("SPOTIFY_ID_3")
-	secretKey := os.Getenv("SPOTIFY_SECRET_KEY_3")
 	auth.SetAuthInfo(clientID, secretKey)
+	u := auth.AuthURL(state)
+	fmt.Println(url.Parse(u))
+	// first start an HTTP server
+	uu, _ := url.Parse(u)
+	fmt.Printf("URL: %s\n", uu.String())
+  	fmt.Printf("Scheme: %s\n", uu.Scheme)
+  	fmt.Printf("Opaque: %s\n", uu.Opaque)
+  	fmt.Printf("User: %s\n", uu.User)
+  	fmt.Printf("Host: %s\n", uu.Host)
+  	fmt.Printf("Hostname(): %s\n", uu.Hostname())
+  	fmt.Printf("Path: %s\n", uu.Path)
+  	fmt.Printf("RawPath: %s\n", uu.RawPath)
+  	fmt.Printf("RawQuery: %s\n", uu.RawQuery)
+  	fmt.Printf("Fragment: %s\n", uu.Fragment)
 
-	url := auth.AuthURL(state)
-	fmt.Println("Please log in to Spotify by visiting the following page in your browser:", url)
+	fmt.Println("Please log in to Spotify by visiting the following page in your browser:", u)
 
 	// wait for auth to complete
-	client := <-ch
+	//client := <-ch
 
-	follow, _ := client.CurrentUsersFollowedArtistsOpt(50, "")
-	//fmt.Println(follow.Artists)
-	for _, f := range follow.Artists {
-		fmt.Println(f)
-	}
-	last := follow.Artists[len(follow.Artists)-1].SimpleArtist.ID
-	fmt.Printf("%T\n", last)
-	follow, _ = client.CurrentUsersFollowedArtistsOpt(50, last.String())
-	//fmt.Println(follow.Artists)
-	for _, f := range follow.Artists {
-		fmt.Println(f)
-	}
+	//http.HandleFunc("/callback", completeAuth)
+	http.HandleFunc("/callback", redirectHandler)
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Got request for:", r.URL.String(), client.Token)
+		//log.Println(client.Token.accessToken)
+		//fmt.Fprintf(w, "redirect")
+		//fmt.Println(w)
+		http.Redirect(w, r, string(u), 301) 
+	})
+	http.ListenAndServe(":8080", nil)
+
+	fmt.Println(client.Token())
+
 }
 
-func completeAuth(w http.ResponseWriter, r *http.Request) {
-	tok, err := auth.Token(state, r)
+/*
+func redirectHandler(w http.ResponseWriter, r *http.Request) {
+	// use the same state string here that you used to generate the URL
+	token, err := auth.Token(state, r)
 	if err != nil {
-		http.Error(w, "Couldn't get token", http.StatusForbidden)
-		log.Fatal(err)
+		  http.Error(w, "Couldn't get token", http.StatusNotFound)
+		  return
 	}
 	if st := r.FormValue("state"); st != state {
 		http.NotFound(w, r)
 		log.Fatalf("State mismatch: %s != %s\n", st, state)
 	}
-	// use the token to get an authenticated client
-	client := auth.NewClient(tok)
-	fmt.Fprintf(w, "Login Completed!")
-	ch <- &client
-}
+	// create a client using the specified token
+	client = auth.NewClient(token)
+	fmt.Println(client)
+	// the client can now be used to make authenticated requests
+	http.Redirect(w, r, "/", 301)
+}*/
