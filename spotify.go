@@ -71,7 +71,7 @@ func getRecommendationId(client spotify.Client, ids []string) []string {
 	return recommendIds
 }
 
-func getRecommendedArtistsId(client spotify.Client, recommendIds, artistsId []string) []artistInfo {
+func getRecommendedArtists(client spotify.Client, recommendIds, artistsId []string) []artistInfo {
 	var recommendedArtists []artistInfo
 	// TODO: use redis or set to figure out if id is in following
 	loop:

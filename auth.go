@@ -21,9 +21,9 @@ func redirectHandler(w http.ResponseWriter, r *http.Request) {
 
 	// the client can now be used to make authenticated requests
 	//ch <- &client
+	//fmt.Fprintf(os.Stdout, "session : %#v\n", session.Values["token"].(Oauth2Token).flag)
 	session, _ := store.Get(r, "cookie-name")
 	session.Values["token"] = Oauth2Token{*token}
-	//fmt.Fprintf(os.Stdout, "session : %#v\n", session.Values["token"].(Oauth2Token).flag)
 	err = session.Save(r, w)
 	fmt.Println("err: ", err)
 
