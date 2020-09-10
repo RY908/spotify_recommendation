@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"log"
+	//"os"
 )
 
 func redirectHandler(w http.ResponseWriter, r *http.Request) {
@@ -12,10 +14,19 @@ func redirectHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Couldn't get token", http.StatusNotFound)
 		return
 	}
-	// create a client using the specified token
-	client := auth.NewClient(token)
-	fmt.Println(client)
+	if st := r.FormValue("state"); st != state {
+		http.NotFound(w, r)
+		log.Fatalf("State mismatch: %s != %s\n", st, state)
+	}
+
 	// the client can now be used to make authenticated requests
-	//http.Redirect(w, r, "/", 301)
+	//ch <- &client
+	session, _ := store.Get(r, "cookie-name")
+	session.Values["token"] = Oauth2Token{*token}
+	//fmt.Fprintf(os.Stdout, "session : %#v\n", session.Values["token"].(Oauth2Token).flag)
+	err = session.Save(r, w)
+	fmt.Println("err: ", err)
+
+	http.Redirect(w, r, "/home", 301)
 }
 
