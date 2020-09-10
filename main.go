@@ -5,8 +5,12 @@ import (
 	"log"
 	"os"
 	"net/http"
-
+	//"net/url"
+	"encoding/gob"
+	"golang.org/x/oauth2"
 	"github.com/zmb3/spotify"
+	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 )
 
 // redirectURI is the OAuth redirect URI for the application.
@@ -15,55 +19,56 @@ import (
 const redirectURI = "http://localhost:8080/callback"
 
 var (
+	clientID = os.Getenv("SPOTIFY_ID_3")
+	secretKey = os.Getenv("SPOTIFY_SECRET_3")
 	auth  = spotify.NewAuthenticator(redirectURI, spotify.ScopeUserFollowRead)
 	ch    = make(chan *spotify.Client)
 	state = "abc123"
+	//client spotify.Client
+	key = []byte("spotify_access_token")
+    store = sessions.NewCookieStore(key)
 )
 
-func main() {
-	// first start an HTTP server
-	http.HandleFunc("/callback", completeAuth)
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Got request for:", r.URL.String())
-	})
-	go http.ListenAndServe(":8080", nil)
-
-	clientID := os.Getenv("SPOTIFY_ID_3")
-	secretKey := os.Getenv("SPOTIFY_SECRET_KEY_3")
-	auth.SetAuthInfo(clientID, secretKey)
-
-	url := auth.AuthURL(state)
-	fmt.Println("Please log in to Spotify by visiting the following page in your browser:", url)
-
-	// wait for auth to complete
-	client := <-ch
-
-	follow, _ := client.CurrentUsersFollowedArtistsOpt(50, "")
-	//fmt.Println(follow.Artists)
-	for _, f := range follow.Artists {
-		fmt.Println(f)
-	}
-	last := follow.Artists[len(follow.Artists)-1].SimpleArtist.ID
-	fmt.Printf("%T\n", last)
-	follow, _ = client.CurrentUsersFollowedArtistsOpt(50, last.String())
-	//fmt.Println(follow.Artists)
-	for _, f := range follow.Artists {
-		fmt.Println(f)
-	}
+type Oauth2Token struct {
+	Token oauth2.Token
 }
 
-func completeAuth(w http.ResponseWriter, r *http.Request) {
-	tok, err := auth.Token(state, r)
-	if err != nil {
-		http.Error(w, "Couldn't get token", http.StatusForbidden)
-		log.Fatal(err)
-	}
-	if st := r.FormValue("state"); st != state {
-		http.NotFound(w, r)
-		log.Fatalf("State mismatch: %s != %s\n", st, state)
-	}
-	// use the token to get an authenticated client
-	client := auth.NewClient(tok)
-	fmt.Fprintf(w, "Login Completed!")
-	ch <- &client
+
+func main() {
+	gob.Register(Oauth2Token{})
+
+	// セッション初期処理
+	//store.SessionInit()
+
+	//var client *spotify.Client
+	auth.SetAuthInfo(clientID, secretKey)
+	u := auth.AuthURL(state)
+	// first start an HTTP server
+
+	fmt.Println("Please log in to Spotify by visiting the following page in your browser:", u)
+
+	// wait for auth to complete
+	//client := <-ch
+
+	r := mux.NewRouter()
+	//http.HandleFunc("/callback", completeAuth)
+	r.HandleFunc("/callback", redirectHandler)
+	r.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, string(u), 301) 
+	})
+	r.HandleFunc("/home", func(w http.ResponseWriter, r *http.Request) {
+		token := getTokenFromSession(r)
+		client := auth.NewClient(&token)
+		user, err := client.CurrentUser()
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("You are logged in as:", user.ID)
+	})
+	// rを割当
+	http.Handle("/", r)
+	http.ListenAndServe(":8080", nil)
+	//client = <-ch
+	//fmt.Println(client.Token())
+
 }
