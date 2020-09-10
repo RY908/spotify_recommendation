@@ -11,11 +11,11 @@ entity "Artist" {
   timestamp: timestamp
 }
 
-entity "Relation" {
+entity "Relate" {
   --
   name1: string <<FK>>
   name2: string <<FK>>
 }
 
-Artist }o..o{ Relation
+Artist ||..o{ Relate
 @enduml
