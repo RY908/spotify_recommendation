@@ -11,20 +11,20 @@ user -> spotify: Login
 spotify --> server: Redirect
 server -> spotify: Request token
 spotify --> server: Return token
-server -> spotify: client.CurrentUsersFollowedArtists
-spotify --> server: FullArtistCursorPage
+server -> spotify: getFollowingArtists
+spotify --> server: artists [], artistsId []
 server -> DB: Store (artistName, artistId)
+server -> redis: set (artistName, artist id)
 
 ===Get artists recommendation===
 
 server -> user: Display user's followed artists
 user -> server: Pick up artist
-server -> DB: Get_artist_id([]artistName)
-DB --> server: Return []artistId
+server -> redis: Get_artist_id([]artistName)
+redis --> server: Return artistId []
 
-server -> spotify: GetRecommendations()
-spotify --> server: Return recommended track
-server -> server: Get artist id from track information
+server -> spotify: getRecommendedArtists
+spotify --> server: Return recommended artists
 alt related artist is not stored or timestamp expired
   server -> spotify: RelatedArtist()
   spotify --> server: Return related artists
