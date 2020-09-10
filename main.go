@@ -30,6 +30,7 @@ var (
 	//store = sessions.NewCookieStore(key)
 	store *sessions.CookieStore
 	session *sessions.Session
+	conn = Connection()
 )
 
 type Oauth2Token struct {
@@ -38,6 +39,7 @@ type Oauth2Token struct {
 
 func main() {
 	gob.Register(Oauth2Token{})
+	defer conn.Close()
 
 	// セッション初期処理
 	sessionInit()

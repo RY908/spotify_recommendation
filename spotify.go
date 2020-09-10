@@ -35,6 +35,7 @@ func getFollowingArtists(client spotify.Client) ([]artistInfo, []string) {
 			var name, ID, url, iconUrl string
 			name, ID, url, iconUrl = getArtistInfo(following)
 			lastId = ID
+			_ := Set(name, ID, conn)
 			artists = append(artists, artistInfo{name, ID, url, iconUrl})
 			artistsId = append(artistsId, ID)
 		}
