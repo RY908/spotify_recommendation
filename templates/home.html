@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Golang Template Test</title>
+</head>
+<body>
+<form method="post" action="/result">
+<ul>
+    <input type="submit" name="button">
+    {{range .}}
+        <input type="checkbox" name="artist" value={{.ID}}> <a href={{.Url}}>{{.Name}}</a> <img src={{.IconUrl}}> <br>
+        <!-- <li> <a href={{.Url}}>{{.Name}}</a> <img src={{.IconUrl}}> </li> --->
+    {{end}}
+</ul>  
+</form>  
+</body>
+</html>

@@ -12,6 +12,7 @@ entity "Artist" {
 }
 
 entity "Relate" {
+  relate_id: string
   --
   name1: string <<FK>>
   name2: string <<FK>>
