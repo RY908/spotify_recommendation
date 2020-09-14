@@ -22,7 +22,7 @@ var (
 	clientID = os.Getenv("SPOTIFY_ID_3")
 	secretKey = os.Getenv("SPOTIFY_SECRET_3")
 	auth  = spotify.NewAuthenticator(redirectURI, spotify.ScopeUserFollowRead)
-	ch    = make(chan *spotify.Client)
+	//ch    = make(chan *spotify.Client)
 	state = "abc123"
 	//client spotify.Client
 	session_name = "spotify_access_token"
@@ -30,7 +30,7 @@ var (
 	//store = sessions.NewCookieStore(key)
 	store *sessions.CookieStore
 	session *sessions.Session
-	conn = Connection()
+	//conn = Connection()
 )
 
 type Oauth2Token struct {
@@ -39,7 +39,7 @@ type Oauth2Token struct {
 
 func main() {
 	gob.Register(Oauth2Token{})
-	defer conn.Close()
+	//defer conn.Close()
 
 	// セッション初期処理
 	sessionInit()
@@ -49,12 +49,14 @@ func main() {
 	//fmt.Println("Please log in to Spotify by visiting the following page in your browser:", u)
 
 	r := mux.NewRouter()
+
+	r.HandleFunc("/", loginHandler)
 	r.HandleFunc("/callback", redirectHandler)
-	r.HandleFunc("/login", loginHandler)
-	r.HandleFunc("/home", homeHandler)
+	r.HandleFunc("/home", homeHandler).Methods("GET")
+	r.HandleFunc("/result", resultHander).Methods("POST")
 	r.HandleFunc("/logout", logoutHandler)
 	// rを割当
-	http.Handle("/", r)
-	http.ListenAndServe(":8080", nil)
+	//http.Handle("/", r)
+	http.ListenAndServe(":8080", r)
 
 }

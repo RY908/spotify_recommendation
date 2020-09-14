@@ -19,23 +19,32 @@ server -> redis: set (artistName, artist id)
 ===Get artists recommendation===
 
 server -> user: Display user's followed artists
+activate user
 user -> server: Pick up artist
 server -> redis: Get_artist_id([]artistName)
+activate server
+activate redis
 redis --> server: Return artistId []
-
+deactivate redis
 server -> spotify: getRecommendedArtists
+activate spotify
 spotify --> server: Return recommended artists
 alt related artist is not stored or timestamp expired
   server -> spotify: RelatedArtist()
   spotify --> server: Return related artists
+  deactivate spotify
   server -> DB: store (artist, related artists)
+  activate DB
 else stored in DB
   server -> DB: GetRelatedArtists()
   DB --> server: Return related artists
 end 
 
 server -> DB: store (artistName, relatedArtists)
+deactivate DB
+deactivate server
 server --> user: Display artist recommendation
+deactivate user
 
 ===Get tracks recommendation===
 
