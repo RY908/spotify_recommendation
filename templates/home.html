@@ -5,14 +5,32 @@
     <title>Golang Template Test</title>
 </head>
 <body>
+<!--
 <form method="post" action="/result">
 <ul>
     <input type="submit" name="button">
     {{range .}}
         <input type="checkbox" name="artist" value={{.ID}}> <a href={{.Url}}>{{.Name}}</a> <img src={{.IconUrl}}> <br>
-        <!-- <li> <a href={{.Url}}>{{.Name}}</a> <img src={{.IconUrl}}> </li> --->
     {{end}}
 </ul>  
+-->
 </form>  
+<form method="post" action="/result">
+    <input type="submit" name="button">
+    <table border="1" style="border-collapse: collapse">
+        <tr>
+            <th></th>
+            <th></th>
+            <th>Name</th>
+        </tr>
+        {{range .}}
+            <tr>
+                <td><input type="checkbox" name="artist" value={{.ID}}></td>
+                <td><img src={{.IconUrl}} width="75" height="75"></td>
+                <td><a href={{.Url}}>{{.Name}}</a></td>
+            </tr>
+        {{end}}
+    </table>
+</form>
 </body>
 </html>

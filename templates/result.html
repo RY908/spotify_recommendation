@@ -5,10 +5,24 @@
     <title>Golang Template Test</title>
 </head>
 <body>
+<!--
 <ul>
     {{range .}}
         <li> <a href={{.Url}}>{{.Name}}</a> <img src={{.IconUrl}}> </li>
     {{end}}
-</ul>  
+</ul> 
+-->
+<table border="1" style="border-collapse: collapse">
+    <tr>
+        <th></th>
+        <th>Name</th>
+    </tr>
+    {{range .}}
+        <tr>
+            <td><img src={{.IconUrl}} width="75" height="75"></td>
+            <td><a href={{.Url}}>{{.Name}}</a></td>
+        </tr>
+    {{end}}
+</table> 
 </body>
 </html>
