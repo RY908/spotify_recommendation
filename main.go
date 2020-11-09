@@ -1,7 +1,7 @@
 package main
 
 import (
-	//"fmt"
+	"fmt"
 	//"log"
 	"os"
 	"net/http"
@@ -11,6 +11,9 @@ import (
 	"github.com/zmb3/spotify"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
+	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-gorp/gorp"
 )
 
 // redirectURI is the OAuth redirect URI for the application.
@@ -31,6 +34,8 @@ var (
 	store *sessions.CookieStore
 	session *sessions.Session
 	//conn = Connection()
+	db, _ = sql.Open("mysql", "root:Ryusei0908@/test?parseTime=true")
+	dbmap = &gorp.DbMap{Db: db, Dialect: gorp.MySQLDialect{}}
 )
 
 type Oauth2Token struct {
@@ -38,6 +43,20 @@ type Oauth2Token struct {
 }
 
 func main() {
+	dbmap.AddTableWithName(ArtistInfo{}, "Artist").SetKeys(false, "ID")
+	dbmap.AddTableWithName(Relate{}, "Relate").SetKeys(true, "RelateId")
+	//dbmap.CreateTablesIfNotExists()
+	fmt.Printf("dbmap: %T", dbmap)
+	defer db.Close()
+	defer dbmap.Db.Close()
+	/*
+	err := db.Ping()
+    if err != nil {
+        panic(err)
+    }
+	defer db.Close()*/
+
+
 	gob.Register(Oauth2Token{})
 	//defer conn.Close()
 
