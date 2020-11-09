@@ -2,18 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Golang Template Test</title>
+    <title>Spotify recommend</title>
 </head>
 <body>
-<!--
-<form method="post" action="/result">
-<ul>
-    <input type="submit" name="button">
-    {{range .}}
-        <input type="checkbox" name="artist" value={{.ID}}> <a href={{.Url}}>{{.Name}}</a> <img src={{.IconUrl}}> <br>
-    {{end}}
-</ul>  
--->
 </form>  
 <form method="post" action="/result">
     <input type="submit" name="button">
@@ -25,7 +16,7 @@
         </tr>
         {{range .}}
             <tr>
-                <td><input type="checkbox" name="artist" value={{.ID}}></td>
+                <td><input type="checkbox" name="artist" value={{.Id}}></td>
                 <td><img src={{.IconUrl}} width="75" height="75"></td>
                 <td><a href={{.Url}}>{{.Name}}</a></td>
             </tr>
