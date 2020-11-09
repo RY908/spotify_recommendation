@@ -31,7 +31,11 @@ func redirectHandler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		log.Fatalf("State mismatch: %s != %s\n", st, state)
 	}
-	
+	fmt.Println(w)
+	fmt.Println()
+	fmt.Println(r)
+	fmt.Println()
+	fmt.Println(r.FormValue("code"))
 	//fmt.Fprintf(os.Stdout, "session : %#v\n", session.Values["token"].(Oauth2Token).flag)
 	session, _ := store.Get(r, session_name)
 	session.Values["token"] = Oauth2Token{Token:*token}
@@ -49,6 +53,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	client := auth.NewClient(&token)
 	artistInfo, _ := getFollowingArtists(client)
 
+	//fmt.Println(artistInfo)
 	t := template.Must(template.ParseFiles("templates/home.html"))
 	err := t.Execute(w, artistInfo)
 	if err != nil {
